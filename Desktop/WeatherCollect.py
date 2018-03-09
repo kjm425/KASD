@@ -69,6 +69,7 @@ while True:
     date = date.encode("utf-8")
     ser.write(date)
     ser.write(temperature)
+    #only displays future classes
     for elements in range(1 ,len(zed[day])):
         if not TimeCompare(day,elements):
             clas = "<"+zed[day][elements][0][0:8].center(20)+">"
