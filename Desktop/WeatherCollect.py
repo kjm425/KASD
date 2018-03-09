@@ -4,6 +4,8 @@ import datetime
 import time
 import math
 from time import strftime, localtime
+from dateutil import tz
+import re
 
 def ScheduleParse():
     with open("myschedule.txt", 'r') as file:
@@ -14,9 +16,22 @@ def ScheduleParse():
             for classes in range(len(filecontent[element])):
                 filecontent[element][classes]=filecontent[element][classes].split(",")
         return filecontent
+def TimeCompare(day,classnum):
+    timezone = tz.gettz("EST")
+    tim = re.findall('\d+:\d\d\s\w\w',zed[day][classnum][1])[0]
+    tim = tim.replace(":",'')
 
-apikey="351315e12c05d02c854514b10129db23"
-url="https://api.darksky.net/forecast/"+apikey+"/39.958377,%20-75.189106"
+    timnum = int(re.findall("\d+",tim)[0])
+    if tim[-2] == 'p':
+        timnum += 1200
+    curtime= int(str(datetime.datetime.now(tz=timezone).hour) + str(datetime.datetime.now(tz=timezone).minute))
+    if curtime >= timnum:
+        return True
+    else:
+        return False
+
+apikey = "351315e12c05d02c854514b10129db23"
+url = "https://api.darksky.net/forecast/"+apikey+"/39.958377,%20-75.189106"
 accountsid="AC7f79374c0d2133a1cdea9029f71856ac"
 apiinfo=requests.get(url).json()
 temp= str(apiinfo['currently']['temperature'])
@@ -33,7 +48,7 @@ date = "<" + (str(strftime("%Y-%m-%d %H:%M:%S", localtime())).center(20)) +">"
 temperature = "<" + ("Temp:" +str(math.floor(float(temp)))+"F "+str(apiinfo['currently']['summary'][0]).upper()+str(apiinfo['currently']['summary'][1:]).lower()).center(20) + ">"
 temperature = temperature.encode("utf-8")
 date = date.encode("utf-8")
-ser = serial.Serial(port="/dev/ttyACM1",baudrate=9600)
+ser = serial.Serial(port="COM4",baudrate=9600)
 
 zed=ScheduleParse()
 waitfor = ''
@@ -52,15 +67,17 @@ while True:
     temperature = "<" + ( str(math.floor(float(temp))) + "F " + str(apiinfo['currently']['summary'][0]).upper() + str(apiinfo['currently']['summary'][1:]).lower()).center(20) + ">"
     temperature = temperature.encode("utf-8")
     date = date.encode("utf-8")
+    ser.write(date)
+    ser.write(temperature)
     for elements in range(1 ,len(zed[day])):
-        ser.write(date)
-        ser.write(temperature)
-        clas = "<"+zed[day][elements][0][0:8].center(20)+">"
-        tim = "<"+ zed[day][elements][1].center(20) + ">"
-        bytelines=clas.encode("ascii")
-        ser.write(bytelines)
-        times = tim.encode("ascii")
-        ser.write(times)
-        time.sleep(5)
+        if not TimeCompare(day,elements):
+            clas = "<"+zed[day][elements][0][0:8].center(20)+">"
+            tim = "<"+ zed[day][elements][1].center(20) + ">"
+            bytelines=clas.encode("ascii")
+            ser.write(bytelines)
+            times = tim.encode("ascii")
+            ser.write(times)
+            time.sleep(10)
+
 
 ser.close()
