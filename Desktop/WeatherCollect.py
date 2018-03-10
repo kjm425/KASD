@@ -48,7 +48,7 @@ date = "<" + (str(strftime("%Y-%m-%d %H:%M:%S", localtime())).center(20)) +">"
 temperature = "<" + ("Temp:" +str(math.floor(float(temp)))+"F "+str(apiinfo['currently']['summary'][0]).upper()+str(apiinfo['currently']['summary'][1:]).lower()).center(20) + ">"
 temperature = temperature.encode("utf-8")
 date = date.encode("utf-8")
-ser = serial.Serial(port="COM4",baudrate=9600)
+ser = serial.Serial(port="/dev/ttyACM0",baudrate=9600)
 
 zed=ScheduleParse()
 waitfor = ''
@@ -70,15 +70,29 @@ while True:
     ser.write(date)
     ser.write(temperature)
     #only displays future classes
+    serobjs=[]
     for elements in range(1 ,len(zed[day])):
         if not TimeCompare(day,elements):
             clas = "<"+zed[day][elements][0][0:8].center(20)+">"
             tim = "<"+ zed[day][elements][1].center(20) + ">"
             bytelines=clas.encode("ascii")
+            serobjs.append(bytelines)
             ser.write(bytelines)
             times = tim.encode("ascii")
-            ser.write(times)
-            time.sleep(10)
+            serobjs.append(bytelines)
+    if serobjs !=[]:
+        for stuff in range(0,len(serobjs)+1,2):
+            ser.write(serobjs[stuff])
+            ser.write(serobjs[stuff+1])
+            time.sleep(5)
+    else:
+        donemessage= "<" +"No more classes.".center(20)+">"
+        done= "<"+"Time to study.".center(20)+ ">"
+        donemessage= donemessage.encode("ascii")
+        done=done.encode("ascii")
+        ser.write(donemessage)
+        ser.write(done)
+    time.sleep(10)
 
 
 ser.close()
