@@ -32,7 +32,6 @@ def TimeCompare(day,classnum):
 
 apikey = "351315e12c05d02c854514b10129db23"
 url = "https://api.darksky.net/forecast/"+apikey+"/39.958377,%20-75.189106"
-accountsid="AC7f79374c0d2133a1cdea9029f71856ac"
 apiinfo=requests.get(url).json()
 temp= str(apiinfo['currently']['temperature'])
 
