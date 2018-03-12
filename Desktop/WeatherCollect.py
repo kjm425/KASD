@@ -62,11 +62,11 @@ ser.flush()
 #day is numerical day of week, may have to write an if statement to make sure it still works on weekends
 lasttime=0
 while True:
-    apiinfo=requests.get(url).json()
-    temp= str(apiinfo['currently']['temperature'])
     date = "<" + (str(strftime("%Y-%m-%d %H:%M:%S", localtime())).center(20)) + ">"
     curtime = datetime.datetime.timestamp(datetime.datetime.now())
     if (lasttime+240)<curtime:
+        apiinfo = requests.get(url).json()
+        temp = str(apiinfo['currently']['temperature'])
         temperature = "<" + ( str(math.floor(float(temp))) + "F " + str(apiinfo['currently']['summary'][0]).upper() + str(apiinfo['currently']['summary'][1:]).lower()).center(20) + ">"
         temperature = temperature.encode("utf-8")
         lasttime = curtime
@@ -89,7 +89,15 @@ while True:
         for stuff in range(0,len(serobjs)+1,2):
             ser.write(serobjs[stuff])
             ser.write(serobjs[stuff+1])
-            time.sleep(5)
+            time.sleep(1)
+            for _ in range(5):
+                date = "<" + (str(strftime("%Y-%m-%d %H:%M:%S", localtime())).center(20)) + ">"
+                date = date.encode("utf-8")
+                ser.write(date)
+                ser.write(temperature)
+                ser.write(serobjs[stuff])
+                ser.write(serobjs[stuff + 1])
+                time.sleep(1)
     else:
         donemessage= "<" +"No more classes.".center(20)+">"
         done= "<"+"Time to study.".center(20)+ ">"
