@@ -3,8 +3,8 @@ import bs4 as bs
 import re
 
 #Fill the two fields below to make it work
-drexelusername = ""
-bannerwebPIN = ""
+drexelusername = "kjm425"
+bannerwebPIN = "139666"
 
 browser= webdriver.Firefox()
 browser.get('https://banner.drexel.edu/pls/duprod/bwskfshd.P_CrseSchd')
